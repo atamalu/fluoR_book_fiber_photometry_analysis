@@ -1,1 +1,1 @@
-This is a minimal example of a book based on R Markdown and **bookdown** (https://github.com/rstudio/bookdown). Please see the page "Get Started" at https://bookdown.org/home/about/ for how to compile this example.
+The files for my [Bookdown on analysis and visualization of fiber photometry data](https://bookdown.org/anta8363/fluoR_bookdown/)

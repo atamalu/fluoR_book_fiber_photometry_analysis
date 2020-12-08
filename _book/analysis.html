@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 5 Analysis | Analyzing and visualizing fiber photometry data with fluoR</title>
+  <meta name="description" content="This is meant to explain the reasoning behind fluoR’s functions and how to use them." />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 5 Analysis | Analyzing and visualizing fiber photometry data with fluoR" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is meant to explain the reasoning behind fluoR’s functions and how to use them." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 5 Analysis | Analyzing and visualizing fiber photometry data with fluoR" />
+  
+  <meta name="twitter:description" content="This is meant to explain the reasoning behind fluoR’s functions and how to use them." />
+  
+
+<meta name="author" content="Andrew Tamalunas" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="vis.html"/>
+<link rel="next" href="references.html"/>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
+<link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Analyzing and visualizing fiber photometry data with fluoR</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#index-whyfluor"><i class="fa fa-check"></i><b>1.1</b> Why use fluoR?</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#index-whofluorfor"><i class="fa fa-check"></i><b>1.2</b> Who is fluoR for?</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#background"><i class="fa fa-check"></i><b>1.3</b> Background</a><ul>
+<li class="chapter" data-level="1.3.1" data-path="index.html"><a href="index.html#index-prerecording"><i class="fa fa-check"></i><b>1.3.1</b> pre-recording</a></li>
+<li class="chapter" data-level="1.3.2" data-path="index.html"><a href="index.html#index-recording"><i class="fa fa-check"></i><b>1.3.2</b> recording</a></li>
+<li class="chapter" data-level="1.3.3" data-path="index.html"><a href="index.html#index-postrecording"><i class="fa fa-check"></i><b>1.3.3</b> post-recording</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>2</b> Setting up fluoR</a><ul>
+<li class="chapter" data-level="2.1" data-path="intro.html"><a href="intro.html#intro-install"><i class="fa fa-check"></i><b>2.1</b> Installation</a></li>
+<li class="chapter" data-level="2.2" data-path="intro.html"><a href="intro.html#intro-convert"><i class="fa fa-check"></i><b>2.2</b> Convert to fluoR format</a></li>
+<li class="chapter" data-level="2.3" data-path="intro.html"><a href="intro.html#intro-inout"><i class="fa fa-check"></i><b>2.3</b> Input/Output</a></li>
+<li class="chapter" data-level="2.4" data-path="intro.html"><a href="intro.html#intro-examples"><i class="fa fa-check"></i><b>2.4</b> Examples</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="intro.html"><a href="intro.html#intro-formatdata"><i class="fa fa-check"></i><b>2.4.1</b> Format data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="stand.html"><a href="stand.html"><i class="fa fa-check"></i><b>3</b> Standardizing Data</a><ul>
+<li class="chapter" data-level="3.1" data-path="stand.html"><a href="stand.html#stand-reasons"><i class="fa fa-check"></i><b>3.1</b> Reasons to standardize data</a></li>
+<li class="chapter" data-level="3.2" data-path="stand.html"><a href="stand.html#stand-methods"><i class="fa fa-check"></i><b>3.2</b> Methods of standardization</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="stand.html"><a href="stand.html#stand-methods-zscore"><i class="fa fa-check"></i><b>3.2.1</b> z-scores</a></li>
+<li class="chapter" data-level="3.2.2" data-path="stand.html"><a href="stand.html#stand-methods-bzscore"><i class="fa fa-check"></i><b>3.2.2</b> baseline z-scores</a></li>
+<li class="chapter" data-level="3.2.3" data-path="stand.html"><a href="stand.html#stand-methods-mzscore"><i class="fa fa-check"></i><b>3.2.3</b> modified z scores</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="stand.html"><a href="stand.html#stand-comparison"><i class="fa fa-check"></i><b>3.3</b> z-score comparison</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="stand.html"><a href="stand.html#stand-comparison-vis"><i class="fa fa-check"></i><b>3.3.1</b> Visualization</a></li>
+<li class="chapter" data-level="3.3.2" data-path="stand.html"><a href="stand.html#stand-comparison-table"><i class="fa fa-check"></i><b>3.3.2</b> Summary table</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="stand.html"><a href="stand.html#stand-examples"><i class="fa fa-check"></i><b>3.4</b> Examples</a><ul>
+<li class="chapter" data-level="3.4.1" data-path="stand.html"><a href="stand.html#stand-examples-ex1"><i class="fa fa-check"></i><b>3.4.1</b> Example 1</a></li>
+<li class="chapter" data-level="3.4.2" data-path="stand.html"><a href="stand.html#stand-examples-ex2"><i class="fa fa-check"></i><b>3.4.2</b> Example 2</a></li>
+<li class="chapter" data-level="3.4.3" data-path="stand.html"><a href="stand.html#stand-examples-ex3"><i class="fa fa-check"></i><b>3.4.3</b> Example 3</a></li>
+<li class="chapter" data-level="3.4.4" data-path="stand.html"><a href="stand.html#stand-examples-ex4"><i class="fa fa-check"></i><b>3.4.4</b> Example 4</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="vis.html"><a href="vis.html"><i class="fa fa-check"></i><b>4</b> Visualization</a><ul>
+<li class="chapter" data-level="4.1" data-path="vis.html"><a href="vis.html#vis-multiple"><i class="fa fa-check"></i><b>4.1</b> Multiple trials</a><ul>
+<li class="chapter" data-level="4.1.1" data-path="vis.html"><a href="vis.html#vis-multiple-plotfluor"><i class="fa fa-check"></i><b>4.1.1</b> plot_trials</a></li>
+<li class="chapter" data-level="4.1.2" data-path="vis.html"><a href="vis.html#vis-multiple-plotgg"><i class="fa fa-check"></i><b>4.1.2</b> ggplot2</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="vis.html"><a href="vis.html#vis-ranges"><i class="fa fa-check"></i><b>4.2</b> Trial ranges</a></li>
+<li class="chapter" data-level="4.3" data-path="vis.html"><a href="vis.html#vis-smoothing"><i class="fa fa-check"></i><b>4.3</b> Smoothing</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="vis.html"><a href="vis.html#vis-smoothing-whittaker"><i class="fa fa-check"></i><b>4.3.1</b> Whittaker filter</a></li>
+<li class="chapter" data-level="4.3.2" data-path="vis.html"><a href="vis.html#vis-smoothing-gam"><i class="fa fa-check"></i><b>4.3.2</b> Generalized additive modeling</a></li>
+<li class="chapter" data-level="4.3.3" data-path="vis.html"><a href="vis.html#vis-smoothing-loess"><i class="fa fa-check"></i><b>4.3.3</b> Loess</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="vis.html"><a href="vis.html#vis-furtherreading"><i class="fa fa-check"></i><b>4.4</b> Further reading</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="analysis.html"><a href="analysis.html"><i class="fa fa-check"></i><b>5</b> Analysis</a><ul>
+<li class="chapter" data-level="5.1" data-path="analysis.html"><a href="analysis.html#analysis-metrics"><i class="fa fa-check"></i><b>5.1</b> Metrics</a><ul>
+<li class="chapter" data-level="5.1.1" data-path="analysis.html"><a href="analysis.html#analysis-metrics-peaks"><i class="fa fa-check"></i><b>5.1.1</b> Peaks</a></li>
+<li class="chapter" data-level="5.1.2" data-path="analysis.html"><a href="analysis.html#analysis-metrics-auc"><i class="fa fa-check"></i><b>5.1.2</b> Area under curve</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="analysis.html"><a href="analysis.html#analysis-app"><i class="fa fa-check"></i><b>5.2</b> Applications</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="analysis.html"><a href="analysis.html#analysis-app-numpeaks"><i class="fa fa-check"></i><b>5.2.1</b> Number of peaks above z score</a></li>
+<li class="chapter" data-level="5.2.2" data-path="analysis.html"><a href="analysis.html#analysis-app-peakdist"><i class="fa fa-check"></i><b>5.2.2</b> Distance between peaks</a></li>
+<li class="chapter" data-level="5.2.3" data-path="analysis.html"><a href="analysis.html#analysis-app-auc"><i class="fa fa-check"></i><b>5.2.3</b> Area under curve</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Analyzing and visualizing fiber photometry data with fluoR</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="analysis" class="section level1">
+<h1><span class="header-section-number">Chapter 5</span> Analysis</h1>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="analysis.html#cb31-1"></a><span class="kw">library</span>(fluoR)</span>
+<span id="cb31-2"><a href="analysis.html#cb31-2"></a><span class="kw">library</span>(ggplot2)</span>
+<span id="cb31-3"><a href="analysis.html#cb31-3"></a><span class="kw">library</span>(ggpubr)</span>
+<span id="cb31-4"><a href="analysis.html#cb31-4"></a><span class="kw">library</span>(cowplot)</span>
+<span id="cb31-5"><a href="analysis.html#cb31-5"></a><span class="kw">theme_set</span>(<span class="kw">theme_pubclean</span>())</span>
+<span id="cb31-6"><a href="analysis.html#cb31-6"></a></span>
+<span id="cb31-7"><a href="analysis.html#cb31-7"></a>df &lt;-<span class="st"> </span><span class="kw">format_data</span>(GCaMP)</span></code></pre></div>
+<div id="analysis-metrics" class="section level2">
+<h2><span class="header-section-number">5.1</span> Metrics</h2>
+<div id="analysis-metrics-peaks" class="section level3">
+<h3><span class="header-section-number">5.1.1</span> Peaks</h3>
+<p>Because of R’s relative ease in subsetting data, I did not include a z-score filter in any of the functions.</p>
+<div id="analysis-metrics-peaks-find" class="section level4">
+<h4><span class="header-section-number">5.1.1.1</span> peak/valley finding</h4>
+<p><code>find_peaks</code> from the <code>fluoR</code> package lets the user find peaks and valleys using a vector of numbers.</p>
+<p>The <code>n.points</code> parameter is used to determine how many decreasing/increasing points on each side of a peak/valley are required for the point to be considered a peak or valley.</p>
+<div id="analysis-metrics-peaks-find-peaks" class="section level5">
+<h5><span class="header-section-number">5.1.1.1.1</span> peaks</h5>
+<p>Using a positive value for <code>find_peaks</code> will return peaks</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="analysis.html#cb32-1"></a>pks &lt;-<span class="st"> </span><span class="kw">find_peaks</span>(<span class="dt">xvals =</span> df<span class="op">$</span>Trial8,</span>
+<span id="cb32-2"><a href="analysis.html#cb32-2"></a>                  <span class="dt">n.points =</span> <span class="dv">10</span>) <span class="co"># 10 decreasing points on each side</span></span></code></pre></div>
+<p><img src="fluoR_bookdown_files/figure-html/unnamed-chunk-41-1.png" width="672" /></p>
+</div>
+<div id="analysis-metrics-peaks-find-valleys" class="section level5">
+<h5><span class="header-section-number">5.1.1.1.2</span> peaks</h5>
+<p>Using a negative value for <code>find_peaks</code> will return valleys (lower extremes)</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="analysis.html#cb33-1"></a>pks &lt;-<span class="st"> </span><span class="kw">find_peaks</span>(<span class="dt">xvals =</span> df<span class="op">$</span>Trial8,</span>
+<span id="cb33-2"><a href="analysis.html#cb33-2"></a>                  <span class="dt">n.points =</span> <span class="dv">-10</span>) <span class="co"># 10 increasing points on each side</span></span></code></pre></div>
+<p><img src="fluoR_bookdown_files/figure-html/unnamed-chunk-43-1.png" width="672" /></p>
+</div>
+</div>
+<div id="analysis-metrics-peaks-sensitivity" class="section level4">
+<h4><span class="header-section-number">5.1.1.2</span> adjusting sensitivity</h4>
+<p>The <code>n.points</code> parameter can be changed to prevent returning false positives.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="analysis.html#cb34-1"></a>pks5 &lt;-<span class="st"> </span><span class="kw">find_peaks</span>(<span class="dt">xvals =</span> df<span class="op">$</span>Trial8, <span class="dt">n.points =</span> <span class="dv">5</span>)</span>
+<span id="cb34-2"><a href="analysis.html#cb34-2"></a>pks10 &lt;-<span class="st"> </span><span class="kw">find_peaks</span>(<span class="dt">xvals =</span> df<span class="op">$</span>Trial8, <span class="dt">n.points =</span> <span class="dv">10</span>)</span>
+<span id="cb34-3"><a href="analysis.html#cb34-3"></a>pks20 &lt;-<span class="st"> </span><span class="kw">find_peaks</span>(<span class="dt">xvals =</span> df<span class="op">$</span>Trial8, <span class="dt">n.points =</span> <span class="dv">20</span>)</span></code></pre></div>
+<ul>
+<li><code>n.points = 5</code> returns the indices for 44 peaks</li>
+<li><code>n.points = 10</code> returns the indices for 34 peaks</li>
+<li><code>n.points = 20</code> returns the indices for 23 peaks</li>
+</ul>
+<p><img src="fluoR_bookdown_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
+</div>
+<div id="analysis-metrics-peaks-distance" class="section level4">
+<h4><span class="header-section-number">5.1.1.3</span> distance between peaks</h4>
+<p>fluoR’s <code>distance_between_peaks</code> function was written to extract values at each peak and between peaks for a single trial. This was inspired by the survival regression analysis done by <span class="citation">(Gunaydin et al. <a href="#ref-gunaydin_natural_2014" role="doc-biblioref">2014</a>)</span>.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="analysis.html#cb35-1"></a>peak.dist &lt;-<span class="st"> </span><span class="kw">distance_between_peaks</span>(<span class="dt">dataframe =</span> df,</span>
+<span id="cb35-2"><a href="analysis.html#cb35-2"></a>                                    <span class="dt">trial =</span> <span class="dv">8</span>,</span>
+<span id="cb35-3"><a href="analysis.html#cb35-3"></a>                                    <span class="dt">time.range =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">4</span>),</span>
+<span id="cb35-4"><a href="analysis.html#cb35-4"></a>                                    <span class="dt">n.points =</span> <span class="dv">8</span>)</span>
+<span id="cb35-5"><a href="analysis.html#cb35-5"></a><span class="kw">head</span>(peak.dist)</span></code></pre></div>
+<pre><code>##   index.start index.stop index.distance peak.diff.time peak1.intensity
+## 1           9         30             21         0.2064          120.77
+## 2          30         48             18         0.1770          120.51
+## 3          48         50              2         0.0196          120.96
+## 4          50         63             13         0.1278          120.96
+## 5          63         82             19         0.1868          120.80
+## 6          82         83              1         0.0098          120.81
+##   peak2.intensity peak.diff.intensity
+## 1          120.51               -0.26
+## 2          120.96                0.45
+## 3          120.96                0.00
+## 4          120.80               -0.16
+## 5          120.81                0.01
+## 6          120.81                0.00</code></pre>
+<p>The variables returned are useful for both graphing and analysis.</p>
+<ul>
+<li><code>index.start</code> and <code>index.stop</code> for indexing in reference to the original dataframe</li>
+<li><code>index.distance</code> for discrete counts, regardless of how frequently data points are recorded</li>
+<li><code>peak.diff.time</code> for the time between each pair of peaks</li>
+<li><code>peak1.intensity</code> and <code>peak2.intensity</code> for the values each peak is located at (think counting peaks above a specific z score)</li>
+<li><code>peak.diff.intensity</code> for finding continuous increases or decreases in peak fluorescence signal over time</li>
+</ul>
+</div>
+</div>
+<div id="analysis-metrics-auc" class="section level3">
+<h3><span class="header-section-number">5.1.2</span> Area under curve</h3>
+<p>One may decide that it is best to capture the full area underneath a curve. Area under curve (AUC) allows us to combine x (Time) and y (Intensity) variables into one value.</p>
+<p>There are three important points one should consider before using AUC as a metric for statistical comparisons:
+- the length for each time period being compared should be equal (e.g. 2s pre-onset vs. 2s post-onset)
+- the values should be standardized or centered within each trial (e.g. z-scores from baseline)
+- computing the AUC includes negative values, which can result in a negative value and is moderately affected by large outliers</p>
+<p>fluoR includes the function <code>auc.pre</code> to quickly calculate the AUC for a range of trials during a specified period of time. As an example of how this can be used, let’s compare full pre-trial and post-trial periods for trials 1-4.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="analysis.html#cb37-1"></a><span class="co">### Pre-onset</span></span>
+<span id="cb37-2"><a href="analysis.html#cb37-2"></a>auc.pre &lt;-<span class="st"> </span><span class="kw">auc_trials</span>(<span class="dt">dataframe =</span> df, <span class="dt">trials =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>,</span>
+<span id="cb37-3"><a href="analysis.html#cb37-3"></a>                      <span class="dt">time.range =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">0</span>))</span>
+<span id="cb37-4"><a href="analysis.html#cb37-4"></a></span>
+<span id="cb37-5"><a href="analysis.html#cb37-5"></a><span class="co">### Post-onset</span></span>
+<span id="cb37-6"><a href="analysis.html#cb37-6"></a>auc.post &lt;-<span class="st"> </span><span class="kw">auc_trials</span>(<span class="dt">dataframe =</span> df, <span class="dt">trials =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>,</span>
+<span id="cb37-7"><a href="analysis.html#cb37-7"></a>                       <span class="dt">time.range =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">4</span>))</span>
+<span id="cb37-8"><a href="analysis.html#cb37-8"></a></span>
+<span id="cb37-9"><a href="analysis.html#cb37-9"></a><span class="kw">head</span>(auc.pre)</span></code></pre></div>
+<pre><code>##   Trial1   Trial2   Trial3   Trial4 
+## 328.5656 329.6170 325.8933 361.4260</code></pre>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="analysis.html#cb39-1"></a><span class="kw">head</span>(auc.post)</span></code></pre></div>
+<pre><code>##   Trial1   Trial2   Trial3   Trial4 
+## 328.5480 331.3686 329.9789 361.0577</code></pre>
+<p>The function returns a named vector for each trial’s AUC so we can compare AUC values within and between trials.</p>
+</div>
+</div>
+<div id="analysis-app" class="section level2">
+<h2><span class="header-section-number">5.2</span> Applications</h2>
+<div id="analysis-app-numpeaks" class="section level3">
+<h3><span class="header-section-number">5.2.1</span> Number of peaks above z score</h3>
+<p>Regardless of the periods of time being compared, the first step of using this metric is to determine which peaks are significant. We can do this by using the <code>n.points</code> parameter with the <code>distance_between_peaks</code> function and a set number z-score cutoff. The idea is to make the best combination to represent measured behaviors without excessively skewing the data toward significant or non-significant results.</p>
+<ul>
+<li>judging by word of mouth from other researchers, “significant” peaks tend to be standard z scores of 1.96 and over. But this is not a strict cutoff. It can also be raised to avoid false positives.</li>
+<li>the <code>n.points</code> step is a bit trickier and may require adjusting the parameter.</li>
+</ul>
+<p>Note that this approach does <i>not</i> specifically represent increases in activity <i>per wave</i>. In other words, it quantifies peak points of fluorescence, not the amount of increase in fluorescence from the preceding valley.</p>
+<div id="analysis-app-numpeaks-ex1" class="section level4">
+<h4><span class="header-section-number">5.2.1.1</span> Example 1</h4>
+<p>We first need to standardize the data so that the intensity values represent standard deviations from the baseline mean.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="analysis.html#cb41-1"></a><span class="co"># transform to z-scores using pre-event period as baseline</span></span>
+<span id="cb41-2"><a href="analysis.html#cb41-2"></a>df.stand &lt;-<span class="st"> </span><span class="kw">baseline_transform</span>(<span class="dt">dataframe =</span> df, <span class="dt">trials =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>,</span>
+<span id="cb41-3"><a href="analysis.html#cb41-3"></a>                               <span class="dt">baseline.times =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">0</span>)) </span></code></pre></div>
+<p>Then, we need to determine criteria for the peaks. Here, we can use the following:</p>
+<ul>
+<li>peak (inflection) points 1.96 z scores and above</li>
+<li>peaks must have 10 data points decreasing on each side to be considered “significant”</li>
+</ul>
+<p>To apply this method, is easiest to apply the <code>distance_between_peaks</code> function across trials using a loop. I plan to change this function in the future for automatic compatibility with multiple trials.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="analysis.html#cb42-1"></a>big.list &lt;-<span class="st"> </span><span class="kw">list</span>() <span class="co"># holding list</span></span>
+<span id="cb42-2"><a href="analysis.html#cb42-2"></a>trial.range &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">8</span></span>
+<span id="cb42-3"><a href="analysis.html#cb42-3"></a></span>
+<span id="cb42-4"><a href="analysis.html#cb42-4"></a><span class="co">### Loop across trials</span></span>
+<span id="cb42-5"><a href="analysis.html#cb42-5"></a><span class="cf">for</span>(i <span class="cf">in</span> trial.range){</span>
+<span id="cb42-6"><a href="analysis.html#cb42-6"></a>  <span class="co">## find peaks</span></span>
+<span id="cb42-7"><a href="analysis.html#cb42-7"></a>  df.pks &lt;-<span class="st"> </span><span class="kw">distance_between_peaks</span>(<span class="dt">dataframe =</span> df.stand, <span class="dt">trial =</span> i,</span>
+<span id="cb42-8"><a href="analysis.html#cb42-8"></a>                                   <span class="dt">time.range =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">4</span>), </span>
+<span id="cb42-9"><a href="analysis.html#cb42-9"></a>                                   <span class="dt">n.points =</span> <span class="dv">10</span>)</span>
+<span id="cb42-10"><a href="analysis.html#cb42-10"></a>  <span class="co">## specify trial number</span></span>
+<span id="cb42-11"><a href="analysis.html#cb42-11"></a>  <span class="co">## add if-else statement incase 0 peaks are returned</span></span>
+<span id="cb42-12"><a href="analysis.html#cb42-12"></a>  <span class="cf">if</span>(<span class="kw">nrow</span>(df.pks) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>){</span>
+<span id="cb42-13"><a href="analysis.html#cb42-13"></a>    df.pks<span class="op">$</span>trial &lt;-<span class="st"> </span>i</span>
+<span id="cb42-14"><a href="analysis.html#cb42-14"></a>  }</span>
+<span id="cb42-15"><a href="analysis.html#cb42-15"></a>  </span>
+<span id="cb42-16"><a href="analysis.html#cb42-16"></a>  <span class="co">## add to list</span></span>
+<span id="cb42-17"><a href="analysis.html#cb42-17"></a>  big.list[[i]] &lt;-<span class="st"> </span>df.pks</span>
+<span id="cb42-18"><a href="analysis.html#cb42-18"></a>}</span>
+<span id="cb42-19"><a href="analysis.html#cb42-19"></a></span>
+<span id="cb42-20"><a href="analysis.html#cb42-20"></a><span class="co">### Combine list of data frames</span></span>
+<span id="cb42-21"><a href="analysis.html#cb42-21"></a>df.peaks &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, big.list)</span></code></pre></div>
+<p>Now we have our data frame of information on peaks with 10 decreasing points on each side.</p>
+<p><img src="fluoR_bookdown_files/figure-html/unnamed-chunk-51-1.png" width="672" /></p>
+<p>It seems like only trials 2 and 3 had any post-event z scores above 1.96. Therefore, the fluorescence signal likely did not spike or increase for a significant number of times past baseline for 6 of 8 trials.</p>
+<p>We can get the specific number of peaks that filled the z-score criteria as well. The <code>dplyr</code> package has a few functions that let us quickly compute counts by group.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="analysis.html#cb43-1"></a><span class="kw">library</span>(dplyr)</span>
+<span id="cb43-2"><a href="analysis.html#cb43-2"></a></span>
+<span id="cb43-3"><a href="analysis.html#cb43-3"></a><span class="co">### Filter based on z score cutoff</span></span>
+<span id="cb43-4"><a href="analysis.html#cb43-4"></a>df.peaks.filt &lt;-<span class="st"> </span>df.peaks <span class="op">%&gt;%</span></span>
+<span id="cb43-5"><a href="analysis.html#cb43-5"></a><span class="st">  </span><span class="kw">filter</span>(peak1.intensity <span class="op">&gt;</span><span class="st"> </span><span class="fl">1.96</span> <span class="op">|</span><span class="st"> </span>peak2.intensity <span class="op">&gt;</span><span class="st"> </span><span class="fl">1.96</span>)</span>
+<span id="cb43-6"><a href="analysis.html#cb43-6"></a></span>
+<span id="cb43-7"><a href="analysis.html#cb43-7"></a><span class="co">### Count values per trial</span></span>
+<span id="cb43-8"><a href="analysis.html#cb43-8"></a>total.peaks &lt;-<span class="st"> </span>df.peaks.filt <span class="op">%&gt;%</span></span>
+<span id="cb43-9"><a href="analysis.html#cb43-9"></a><span class="st">  </span><span class="kw">group_by</span>(trial) <span class="op">%&gt;%</span></span>
+<span id="cb43-10"><a href="analysis.html#cb43-10"></a><span class="st">  </span><span class="kw">tally</span>()</span>
+<span id="cb43-11"><a href="analysis.html#cb43-11"></a></span>
+<span id="cb43-12"><a href="analysis.html#cb43-12"></a><span class="kw">print</span>(total.peaks)</span></code></pre></div>
+<pre><code>## # A tibble: 2 x 2
+##   trial     n
+##   &lt;int&gt; &lt;int&gt;
+## 1     2     7
+## 2     3     5</code></pre>
+<p>Indeed, trials 2 and 3 were the only trials with fluorescence peaks above 1.96 that had 10 decreasing points on each side.</p>
+</div>
+</div>
+<div id="analysis-app-peakdist" class="section level3">
+<h3><span class="header-section-number">5.2.2</span> Distance between peaks</h3>
+<p>In the context of recording neural activity, measuring the average distance or time between peaks is representative of how frequently significant spikes in activity occur.</p>
+<div id="analysis-app-peakdist-ex1" class="section level4">
+<h4><span class="header-section-number">5.2.2.1</span> Example 1</h4>
+<p><i><b>Compare the time between post-event activity peaks for trials 1-8 </i></b></p>
+<p>The first steps for using the distance between peaks are actually the same as <a href="analysis.html#analysis-app-numpeaks-ex1">Example 1</a> from z-score peak counting, so we will use the <code>df.peaks.filt</code> dataframe from there. Recall that we have already:</p>
+<ul>
+<li>changed the data to represent standard deviations from baseline (baseline z-scores)</li>
+<li>filtered peaks based on the criteria of z &gt; 1.96 and n.points = 10</li>
+<li>found that only trials 2 and 3 had any fluorescence peaks above 1.96</li>
+</ul>
+<p>Conveniently, this dataframe already has all of the information we need.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="analysis.html#cb45-1"></a>mean.time.bet.peaks &lt;-<span class="st"> </span>df.peaks.filt <span class="op">%&gt;%</span></span>
+<span id="cb45-2"><a href="analysis.html#cb45-2"></a><span class="st">  </span><span class="kw">group_by</span>(trial) <span class="op">%&gt;%</span></span>
+<span id="cb45-3"><a href="analysis.html#cb45-3"></a><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">time.bet.peaks =</span> <span class="kw">mean</span>(peak.diff.time))</span>
+<span id="cb45-4"><a href="analysis.html#cb45-4"></a><span class="kw">print</span>(mean.time.bet.peaks)</span></code></pre></div>
+<pre><code>## # A tibble: 2 x 2
+##   trial time.bet.peaks
+##   &lt;int&gt;          &lt;dbl&gt;
+## 1     2          0.399
+## 2     3          0.297</code></pre>
+<p>Trial 2 has an average time of about 0.399 seconds between significant peaks, while trial 3 has about 0.297 seconds between them.</p>
+</div>
+</div>
+<div id="analysis-app-auc" class="section level3">
+<h3><span class="header-section-number">5.2.3</span> Area under curve</h3>
+<div id="analysis-app-auc-ex1" class="section level4">
+<h4><span class="header-section-number">5.2.3.1</span> Example 1</h4>
+<p><i><b> Compare the post-event AUC for trials 1-8 </i></b></p>
+<p>For comparing between trials during the same time period after or before an event, it is appropriate to standardize the data from a baseline point before computing the AUC.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="analysis.html#cb47-1"></a><span class="co">### Format &amp; standardize data</span></span>
+<span id="cb47-2"><a href="analysis.html#cb47-2"></a>df &lt;-<span class="st"> </span><span class="kw">format_data</span>(GCaMP)</span>
+<span id="cb47-3"><a href="analysis.html#cb47-3"></a></span>
+<span id="cb47-4"><a href="analysis.html#cb47-4"></a>df.stand &lt;-<span class="st"> </span><span class="kw">baseline_transform</span>(<span class="dt">dataframe =</span> df, <span class="dt">trials =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>,</span>
+<span id="cb47-5"><a href="analysis.html#cb47-5"></a>                               <span class="dt">baseline.times =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">4</span>),</span>
+<span id="cb47-6"><a href="analysis.html#cb47-6"></a>                               <span class="dt">type =</span> <span class="st">&#39;z_standard&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="analysis.html#cb48-1"></a><span class="co">### Compute AUC values and create new data frame</span></span>
+<span id="cb48-2"><a href="analysis.html#cb48-2"></a>auc.post &lt;-<span class="st"> </span><span class="kw">auc_trials</span>(<span class="dt">dataframe =</span> df.stand, <span class="dt">trials =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>,</span>
+<span id="cb48-3"><a href="analysis.html#cb48-3"></a>                       <span class="dt">time.range =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">4</span>))</span>
+<span id="cb48-4"><a href="analysis.html#cb48-4"></a></span>
+<span id="cb48-5"><a href="analysis.html#cb48-5"></a>auc.postdf &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</span>
+<span id="cb48-6"><a href="analysis.html#cb48-6"></a>  <span class="dt">Trial =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>,</span>
+<span id="cb48-7"><a href="analysis.html#cb48-7"></a>  <span class="dt">Value =</span> auc.post</span>
+<span id="cb48-8"><a href="analysis.html#cb48-8"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="analysis.html#cb49-1"></a><span class="co">### Graphing</span></span>
+<span id="cb49-2"><a href="analysis.html#cb49-2"></a><span class="kw">ggplot</span>(auc.postdf) <span class="op">+</span></span>
+<span id="cb49-3"><a href="analysis.html#cb49-3"></a><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">x =</span> Trial, <span class="dt">y =</span> Value)) <span class="op">+</span></span>
+<span id="cb49-4"><a href="analysis.html#cb49-4"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> Trial, <span class="dt">y =</span> Value)) <span class="op">+</span></span>
+<span id="cb49-5"><a href="analysis.html#cb49-5"></a><span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>) <span class="op">+</span></span>
+<span id="cb49-6"><a href="analysis.html#cb49-6"></a><span class="st">  </span><span class="kw">labs</span>(</span>
+<span id="cb49-7"><a href="analysis.html#cb49-7"></a>    <span class="dt">x =</span> <span class="st">&#39;Trial Number&#39;</span>,</span>
+<span id="cb49-8"><a href="analysis.html#cb49-8"></a>    <span class="dt">y =</span> <span class="st">&#39;Post-Event AUC&#39;</span></span>
+<span id="cb49-9"><a href="analysis.html#cb49-9"></a>  )</span></code></pre></div>
+<p><img src="fluoR_bookdown_files/figure-html/unnamed-chunk-56-1.png" width="672" /></p>
+</div>
+<div id="analysis-app-auc-ex2" class="section level4">
+<h4><span class="header-section-number">5.2.3.2</span> Example 2</h4>
+<p><i><b> Compare pre- vs. post- event activity for trials 1-8</i></b></p>
+<p>This is a bit tricker. If you are comparing a baseine period to a post-event period, it will likely no longer be appropriate to use baseline deviations in transforming values for the full time series - at least when using the AUC.</p>
+<p>This is because fluctuations in fluorescence on one side of the event (baseline) will be around the same, while post-event deviations from the norm will be exaggerated; causing a higher AUC.</p>
+<p>With that in mind, let’s do a typical z-score transformation for this data. Since each trial is measured for 4 seconds before event onset and 4 seconds after, <code>baseline_transform</code> for the full 8-second period will result in the same thing as manually calculating z-scores for each trial.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="analysis.html#cb50-1"></a><span class="co">### Format &amp; standardize data</span></span>
+<span id="cb50-2"><a href="analysis.html#cb50-2"></a>df &lt;-<span class="st"> </span><span class="kw">format_data</span>(GCaMP)</span>
+<span id="cb50-3"><a href="analysis.html#cb50-3"></a></span>
+<span id="cb50-4"><a href="analysis.html#cb50-4"></a>df.stand &lt;-<span class="st"> </span>fluoR<span class="op">::</span><span class="kw">baseline_transform</span>(<span class="dt">dataframe =</span> df,</span>
+<span id="cb50-5"><a href="analysis.html#cb50-5"></a>                                      <span class="dt">trials =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>,</span>
+<span id="cb50-6"><a href="analysis.html#cb50-6"></a>                                      <span class="dt">baseline.times =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">4</span>), <span class="co"># or min-max timestamps</span></span>
+<span id="cb50-7"><a href="analysis.html#cb50-7"></a>                                      <span class="dt">type =</span> <span class="st">&#39;z_standard&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="analysis.html#cb51-1"></a><span class="co">### Compute AUC values and create new data frame</span></span>
+<span id="cb51-2"><a href="analysis.html#cb51-2"></a>auc.pre &lt;-<span class="st"> </span><span class="kw">auc_trials</span>(<span class="dt">dataframe =</span> df.stand, <span class="dt">trials =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>,</span>
+<span id="cb51-3"><a href="analysis.html#cb51-3"></a>                      <span class="dt">time.range =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">0</span>))</span>
+<span id="cb51-4"><a href="analysis.html#cb51-4"></a>auc.post &lt;-<span class="st"> </span><span class="kw">auc_trials</span>(<span class="dt">dataframe =</span> df.stand, <span class="dt">trials =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>,</span>
+<span id="cb51-5"><a href="analysis.html#cb51-5"></a>                      <span class="dt">time.range =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">4</span>))</span>
+<span id="cb51-6"><a href="analysis.html#cb51-6"></a></span>
+<span id="cb51-7"><a href="analysis.html#cb51-7"></a>auc.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</span>
+<span id="cb51-8"><a href="analysis.html#cb51-8"></a>  <span class="dt">Trial =</span> <span class="kw">rep</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">8</span>, <span class="dt">times =</span> <span class="dv">2</span>),</span>
+<span id="cb51-9"><a href="analysis.html#cb51-9"></a>  <span class="dt">Value =</span> <span class="kw">c</span>(auc.pre, auc.post), <span class="co"># 8 values pre &amp; 8 values post</span></span>
+<span id="cb51-10"><a href="analysis.html#cb51-10"></a>  <span class="dt">Period =</span> <span class="kw">rep</span>(<span class="kw">c</span>(<span class="st">&#39;pre&#39;</span>, <span class="st">&#39;post&#39;</span>), <span class="dt">each =</span> <span class="dv">8</span>)</span>
+<span id="cb51-11"><a href="analysis.html#cb51-11"></a>)</span></code></pre></div>
+<p>We could graph some form of line or bar graph comparison</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="analysis.html#cb52-1"></a><span class="co">### Graphing</span></span>
+<span id="cb52-2"><a href="analysis.html#cb52-2"></a><span class="kw">ggplot</span>(auc.df) <span class="op">+</span></span>
+<span id="cb52-3"><a href="analysis.html#cb52-3"></a><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">x =</span> Trial, <span class="dt">y =</span> Value,</span>
+<span id="cb52-4"><a href="analysis.html#cb52-4"></a>                 <span class="dt">color =</span> Period, <span class="dt">group =</span> Period)) <span class="op">+</span></span>
+<span id="cb52-5"><a href="analysis.html#cb52-5"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> Trial, <span class="dt">y =</span> Value,</span>
+<span id="cb52-6"><a href="analysis.html#cb52-6"></a>                <span class="dt">color =</span> Period, <span class="dt">group =</span> Period)) <span class="op">+</span></span>
+<span id="cb52-7"><a href="analysis.html#cb52-7"></a><span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>) <span class="op">+</span></span>
+<span id="cb52-8"><a href="analysis.html#cb52-8"></a><span class="st">  </span><span class="kw">labs</span>(</span>
+<span id="cb52-9"><a href="analysis.html#cb52-9"></a>    <span class="dt">x =</span> <span class="st">&#39;Trial Number&#39;</span>,</span>
+<span id="cb52-10"><a href="analysis.html#cb52-10"></a>    <span class="dt">y =</span> <span class="st">&#39;AUC&#39;</span>,</span>
+<span id="cb52-11"><a href="analysis.html#cb52-11"></a>    <span class="dt">title =</span> <span class="st">&quot;Comparing fluorescence between pre- and post- event periods&quot;</span></span>
+<span id="cb52-12"><a href="analysis.html#cb52-12"></a>  )</span></code></pre></div>
+<p><img src="fluoR_bookdown_files/figure-html/unnamed-chunk-59-1.png" width="672" /></p>
+<p>Or we could subtract the values and graph the difference between pre- and post- trial AUC values. In other words, how much higher or lower is the post-trial AUC than the pre-trial AUC?</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="analysis.html#cb53-1"></a>auc.diff &lt;-<span class="st"> </span>auc.post <span class="op">-</span><span class="st"> </span>auc.pre</span>
+<span id="cb53-2"><a href="analysis.html#cb53-2"></a></span>
+<span id="cb53-3"><a href="analysis.html#cb53-3"></a>auc.diffdf &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</span>
+<span id="cb53-4"><a href="analysis.html#cb53-4"></a>  <span class="dt">Trial =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>,</span>
+<span id="cb53-5"><a href="analysis.html#cb53-5"></a>  <span class="dt">Value =</span> auc.diff <span class="co"># 8 values pre &amp; 8 values post</span></span>
+<span id="cb53-6"><a href="analysis.html#cb53-6"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="analysis.html#cb54-1"></a><span class="co">### Graphing</span></span>
+<span id="cb54-2"><a href="analysis.html#cb54-2"></a><span class="kw">ggplot</span>(auc.diffdf) <span class="op">+</span></span>
+<span id="cb54-3"><a href="analysis.html#cb54-3"></a><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">x =</span> Trial, <span class="dt">y =</span> Value)) <span class="op">+</span></span>
+<span id="cb54-4"><a href="analysis.html#cb54-4"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> Trial, <span class="dt">y =</span> Value)) <span class="op">+</span></span>
+<span id="cb54-5"><a href="analysis.html#cb54-5"></a><span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>) <span class="op">+</span></span>
+<span id="cb54-6"><a href="analysis.html#cb54-6"></a><span class="st">  </span><span class="kw">labs</span>(</span>
+<span id="cb54-7"><a href="analysis.html#cb54-7"></a>    <span class="dt">x =</span> <span class="st">&#39;Trial Number&#39;</span>,</span>
+<span id="cb54-8"><a href="analysis.html#cb54-8"></a>    <span class="dt">y =</span> <span class="st">&#39;Post-Event AUC&#39;</span>,</span>
+<span id="cb54-9"><a href="analysis.html#cb54-9"></a>    <span class="dt">title =</span> <span class="st">&#39;Post-event change in AUC&#39;</span></span>
+<span id="cb54-10"><a href="analysis.html#cb54-10"></a>  )</span></code></pre></div>
+<p><img src="fluoR_bookdown_files/figure-html/unnamed-chunk-61-1.png" width="672" /></p>
+<p>On the other hand, it should still be okay to center at the baseline <i>mean or median</i> for interpretation purposes. This is because it is assumed that, after centering at baseline, the base line will hover around 0. Waves alternating above or below the 0-point on the y axis will mostly cancel each other out.</p>
+
+</div>
+</div>
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-gunaydin_natural_2014">
+<p>Gunaydin, Lisa A., Logan Grosenick, Joel C. Finkelstein, Isaac V. Kauvar, Lief E. Fenno, Avishek Adhikari, Stephan Lammel, et al. 2014. “Natural Neural Projection Dynamics Underlying Social Behavior.” <em>Cell</em> 157 (7): 1535–51. <a href="https://doi.org/10.1016/j.cell.2014.05.017">https://doi.org/10.1016/j.cell.2014.05.017</a>.</p>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="vis.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["fluoR_bookdown.pdf", "fluoR_bookdown.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

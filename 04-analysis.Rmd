@@ -1,0 +1,406 @@
+# Analysis {#analysis}
+
+```{r, warning=FALSE, message=FALSE}
+library(fluoR)
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+theme_set(theme_pubclean())
+
+df <- format_data(GCaMP)
+```
+
+## Metrics {#analysis-metrics}
+
+### Peaks {#analysis-metrics-peaks}
+
+Because of R's relative ease in subsetting data, I did not include a z-score filter in any of the functions.
+
+#### peak/valley finding {#analysis-metrics-peaks-find}
+
+`find_peaks` from the `fluoR` package lets the user find peaks and valleys using a vector of numbers.
+
+The `n.points` parameter is used to determine how many decreasing/increasing points on each side of a peak/valley are required for the point to be considered a peak or valley. 
+
+##### peaks {#analysis-metrics-peaks-find-peaks}
+
+Using a positive value for `find_peaks` will return peaks
+
+```{r, warning=FALSE, message=FALSE}
+pks <- find_peaks(xvals = df$Trial8,
+                  n.points = 10) # 10 decreasing points on each side
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+plot(x = df$Time, y = df$Trial8, type = 'l',
+     xlab = 'Time Post-Onset', ylab = 'Values')
+
+for(i in pks){
+  points(x = df$Time[pks],
+         y = df$Trial8[pks], col = 'red')
+}
+```
+
+##### peaks {#analysis-metrics-peaks-find-valleys}
+
+Using a negative value for `find_peaks` will return valleys (lower extremes)
+
+```{r, warning=FALSE, message=FALSE}
+pks <- find_peaks(xvals = df$Trial8,
+                  n.points = -10) # 10 increasing points on each side
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+plot(x = df$Time, y = df$Trial8, type = 'l',
+     xlab = 'Time Post-Onset', ylab = 'Values')
+
+for(i in pks){
+  points(x = df$Time[pks],
+         y = df$Trial8[pks], col = 'blue')
+}
+```
+
+#### adjusting sensitivity {#analysis-metrics-peaks-sensitivity}
+
+The `n.points` parameter can be changed to prevent returning false positives. 
+
+```{r, warning=FALSE, message=FALSE}
+pks5 <- find_peaks(xvals = df$Trial8, n.points = 5)
+pks10 <- find_peaks(xvals = df$Trial8, n.points = 10)
+pks20 <- find_peaks(xvals = df$Trial8, n.points = 20)
+```
+
+```{r, warning=FALSE, message=FALSE, include=FALSE}
+### Subset for graphing
+df2 <- df[c('Time', 'Trial8')]
+df2$ind <- seq_along(df2$Time)
+
+### Label peaks for each n.points used
+df2$Alpha5 <- ifelse(df2$ind %in% pks5, '1', '0')
+df2$Alpha10 <- ifelse(df2$ind %in% pks10, '1', '0')
+df2$Alpha20 <- ifelse(df2$ind %in% pks20, '1', '0')
+```
+
+- `n.points = 5` returns the indices for `r length(pks5)` peaks
+- `n.points = 10` returns the indices for `r length(pks10)` peaks
+- `n.points = 20` returns the indices for `r length(pks20)` peaks
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+### Now graph
+n.points.base <- ggplot(df2) +
+  geom_line(aes(x = Time, y = Trial8)) +
+  labs(
+    x = 'Time Post-Offset',
+    y = 'Values'
+  ) +
+  scale_alpha_manual(values = c(0, 1)) + # for geom_point 
+  theme(legend.position = 'none')
+
+### Graphs
+n.points5 <- n.points.base +
+  geom_point(aes(x = Time, y = Trial8, 
+                 alpha = Alpha5), color = 'red') +
+  ggtitle('n.points = 5')
+
+n.points10 <- n.points.base +
+  geom_point(aes(x = Time, y = Trial8, 
+                 alpha = Alpha10), color = 'red') +
+  ggtitle('n.points = 10')
+
+n.points20 <- n.points.base +
+  geom_point(aes(x = Time, y = Trial8, 
+                 alpha = Alpha20), color = 'red') +
+  ggtitle('n.points = 20')
+
+### Add them to grid
+plot_grid(n.points5, n.points10, n.points20, 
+          ncol = 1, nrow = 3, align = 'v')
+```
+
+#### distance between peaks {#analysis-metrics-peaks-distance}
+
+fluoR's `distance_between_peaks` function was written to extract values at each peak and between peaks for a single trial. This was inspired by the survival regression analysis done by [@gunaydin_natural_2014].
+
+```{r}
+peak.dist <- distance_between_peaks(dataframe = df,
+                                    trial = 8,
+                                    time.range = c(-4,4),
+                                    n.points = 8)
+head(peak.dist)
+```
+
+The variables returned are useful for both graphing and analysis.
+
+- `index.start` and `index.stop` for indexing in reference to the original dataframe
+- `index.distance` for discrete counts, regardless of how frequently data points are recorded
+- `peak.diff.time` for the time between each pair of peaks
+- `peak1.intensity` and `peak2.intensity` for the values each peak is located at (think counting peaks above a specific z score)
+- `peak.diff.intensity` for finding continuous increases or decreases in peak fluorescence signal over time
+
+### Area under curve {#analysis-metrics-auc}
+
+One may decide that it is best to capture the full area underneath a curve. Area under curve (AUC) allows us to combine x (Time) and y (Intensity) variables into one value. 
+
+There are three important points one should consider before using AUC as a metric for statistical comparisons:
+- the length for each time period being compared should be equal (e.g. 2s pre-onset vs. 2s post-onset)
+- the values should be standardized or centered within each trial (e.g. z-scores from baseline)
+- computing the AUC includes negative values, which can result in a negative value and is moderately affected by large outliers
+
+fluoR includes the function `auc.pre` to quickly calculate the AUC for a range of trials during a specified period of time. As an example of how this can be used, let's compare full pre-trial and post-trial periods for trials 1-4.
+
+```{r}
+### Pre-onset
+auc.pre <- auc_trials(dataframe = df, trials = 1:4,
+                      time.range = c(-4,0))
+
+### Post-onset
+auc.post <- auc_trials(dataframe = df, trials = 1:4,
+                       time.range = c(0,4))
+
+head(auc.pre)
+head(auc.post)
+```
+The function returns a named vector for each trial's AUC so we can compare AUC values within and between trials.
+
+## Applications {#analysis-app}
+
+### Number of peaks above z score {#analysis-app-numpeaks}
+
+Regardless of the periods of time being compared, the first step of using this metric is to determine which peaks are significant. We can do this by using the `n.points` parameter with the `distance_between_peaks` function and a set number z-score cutoff. The idea is to make the best combination to represent measured behaviors without excessively skewing the data toward significant or non-significant results.
+
+- judging by word of mouth from other researchers, "significant" peaks tend to be standard z scores of 1.96 and over. But this is not a strict cutoff. It can also be raised to avoid false positives.
+- the `n.points` step is a bit trickier and may require adjusting the parameter.
+
+Note that this approach does <i>not</i> specifically represent increases in activity <i>per wave</i>. In other words, it quantifies peak points of fluorescence, not the amount of increase in fluorescence from the preceding valley.
+
+#### Example 1 {#analysis-app-numpeaks-ex1}
+
+We first need to standardize the data so that the intensity values represent standard deviations from the baseline mean.
+
+```{r}
+# transform to z-scores using pre-event period as baseline
+df.stand <- baseline_transform(dataframe = df, trials = 1:8,
+                               baseline.times = c(-4,0)) 
+```
+
+Then, we need to determine criteria for the peaks. Here, we can use the following:
+
+- peak (inflection) points 1.96 z scores and above
+- peaks must have 10 data points decreasing on each side to be considered "significant"
+
+To apply this method, is easiest to apply the `distance_between_peaks` function across trials using a loop. I plan to change this function in the future for automatic compatibility with multiple trials.
+
+```{r}
+big.list <- list() # holding list
+trial.range <- 1:8
+
+### Loop across trials
+for(i in trial.range){
+  ## find peaks
+  df.pks <- distance_between_peaks(dataframe = df.stand, trial = i,
+                                   time.range = c(0,4), 
+                                   n.points = 10)
+  ## specify trial number
+  ## add if-else statement incase 0 peaks are returned
+  if(nrow(df.pks) > 0){
+    df.pks$trial <- i
+  }
+  
+  ## add to list
+  big.list[[i]] <- df.pks
+}
+
+### Combine list of data frames
+df.peaks <- do.call(rbind, big.list)
+```
+
+Now we have our data frame of information on peaks with 10 decreasing points on each side. 
+
+```{r, echo=FALSE}
+ggplot(df.peaks) +
+  geom_segment(x = 0, xend = 1,
+               y = 1.96, yend = 1.96,
+               color = 'red', alpha = 0.05) +
+  geom_boxplot(aes(x = 0.5, y = peak1.intensity,
+                   group = trial)) +
+  geom_point(aes(x = 0.5, y = peak1.intensity,
+                 group = trial), alpha = 0.3) +
+  scale_y_continuous(breaks = seq(-8, 8, 2),
+                     labels = seq(-8, 8, 2),
+                     limits = c(-10, 10)) +
+  labs(
+    y = 'z score',
+    title = 'z scores from baseline by trial',
+    subtitle = 'peak counting with 10 decreasing points each side'
+  ) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank()
+  ) +
+  facet_grid(. ~ trial)
+```
+
+It seems like only trials 2 and 3 had any post-event z scores above 1.96. Therefore, the fluorescence signal likely did not spike or increase for a significant number of times past baseline for 6 of 8 trials. 
+
+We can get the specific number of peaks that filled the z-score criteria as well. The `dplyr` package has a few functions that let us quickly compute counts by group.
+
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+
+### Filter based on z score cutoff
+df.peaks.filt <- df.peaks %>%
+  filter(peak1.intensity > 1.96 | peak2.intensity > 1.96)
+
+### Count values per trial
+total.peaks <- df.peaks.filt %>%
+  group_by(trial) %>%
+  tally()
+
+print(total.peaks)
+```
+
+Indeed, trials 2 and 3 were the only trials with fluorescence peaks above 1.96 that had 10 decreasing points on each side.
+
+### Distance between peaks {#analysis-app-peakdist}
+
+In the context of recording neural activity, measuring the average distance or time between peaks is representative of how frequently significant spikes in activity occur.
+
+#### Example 1 {#analysis-app-peakdist-ex1}
+
+<i><b>Compare the time between post-event activity peaks for trials 1-8 </i></b>
+
+The first steps for using the distance between peaks are actually the same as [Example 1](#analysis-app-numpeaks-ex1) from z-score peak counting, so we will use the `df.peaks.filt` dataframe from there. Recall that we have already:
+
+- changed the data to represent standard deviations from baseline (baseline z-scores)
+- filtered peaks based on the criteria of z > 1.96 and n.points = 10
+- found that only trials 2 and 3 had any fluorescence peaks above 1.96
+
+Conveniently, this dataframe already has all of the information we need.
+
+```{r, warning=FALSE, message=FALSE}
+mean.time.bet.peaks <- df.peaks.filt %>%
+  group_by(trial) %>%
+  summarize(time.bet.peaks = mean(peak.diff.time))
+print(mean.time.bet.peaks)
+```
+Trial 2 has an average time of about `r round(mean.time.bet.peaks$time.bet.peaks[mean.time.bet.peaks$trial == 2], 3)` seconds between significant peaks, while trial 3 has about `r round(mean.time.bet.peaks$time.bet.peaks[mean.time.bet.peaks$trial == 3], 3)` seconds between them.
+
+### Area under curve {#analysis-app-auc}
+
+#### Example 1 {#analysis-app-auc-ex1}
+
+<i><b> Compare the post-event AUC for trials 1-8 </i></b>
+
+For comparing between trials during the same time period after or before an event, it is appropriate to standardize the data from a baseline point before computing the AUC.
+
+```{r}
+### Format & standardize data
+df <- format_data(GCaMP)
+
+df.stand <- baseline_transform(dataframe = df, trials = 1:8,
+                               baseline.times = c(0,4),
+                               type = 'z_standard')
+```
+
+```{r}
+### Compute AUC values and create new data frame
+auc.post <- auc_trials(dataframe = df.stand, trials = 1:8,
+                       time.range = c(0,4))
+
+auc.postdf <- data.frame(
+  Trial = 1:8,
+  Value = auc.post
+)
+```
+
+```{r}
+### Graphing
+ggplot(auc.postdf) +
+  geom_point(aes(x = Trial, y = Value)) +
+  geom_line(aes(x = Trial, y = Value)) +
+  scale_x_continuous(breaks = 1:8) +
+  labs(
+    x = 'Trial Number',
+    y = 'Post-Event AUC'
+  )
+```
+
+#### Example 2 {#analysis-app-auc-ex2}
+
+<i><b> Compare pre- vs. post- event activity for trials 1-8</i></b>
+
+This is a bit tricker. If you are comparing a baseine period to a post-event period, it will likely no longer be appropriate to use baseline deviations in transforming values for the full time series - at least when using the AUC. 
+
+This is because fluctuations in fluorescence on one side of the event (baseline) will be around the same, while post-event deviations from the norm will be exaggerated; causing a higher AUC. 
+
+With that in mind, let's do a typical z-score transformation for this data. Since each trial is measured for 4 seconds before event onset and 4 seconds after, `baseline_transform` for the full 8-second period will result in the same thing as manually calculating z-scores for each trial.
+
+```{r}
+### Format & standardize data
+df <- format_data(GCaMP)
+
+df.stand <- fluoR::baseline_transform(dataframe = df,
+                                      trials = 1:8,
+                                      baseline.times = c(-4,4), # or min-max timestamps
+                                      type = 'z_standard')
+```
+
+```{r}
+### Compute AUC values and create new data frame
+auc.pre <- auc_trials(dataframe = df.stand, trials = 1:8,
+                      time.range = c(-4,0))
+auc.post <- auc_trials(dataframe = df.stand, trials = 1:8,
+                      time.range = c(0,4))
+
+auc.df <- data.frame(
+  Trial = rep(1:8, times = 2),
+  Value = c(auc.pre, auc.post), # 8 values pre & 8 values post
+  Period = rep(c('pre', 'post'), each = 8)
+)
+```
+
+We could graph some form of line or bar graph comparison
+
+```{r}
+### Graphing
+ggplot(auc.df) +
+  geom_point(aes(x = Trial, y = Value,
+                 color = Period, group = Period)) +
+  geom_line(aes(x = Trial, y = Value,
+                color = Period, group = Period)) +
+  scale_x_continuous(breaks = 1:8) +
+  labs(
+    x = 'Trial Number',
+    y = 'AUC',
+    title = "Comparing fluorescence between pre- and post- event periods"
+  )
+```
+
+Or we could subtract the values and graph the difference between pre- and post- trial AUC values. In other words, how much higher or lower is the post-trial AUC than the pre-trial AUC?
+
+```{r}
+auc.diff <- auc.post - auc.pre
+
+auc.diffdf <- data.frame(
+  Trial = 1:8,
+  Value = auc.diff # 8 values pre & 8 values post
+)
+```
+
+```{r}
+### Graphing
+ggplot(auc.diffdf) +
+  geom_point(aes(x = Trial, y = Value)) +
+  geom_line(aes(x = Trial, y = Value)) +
+  scale_x_continuous(breaks = 1:8) +
+  labs(
+    x = 'Trial Number',
+    y = 'Post-Event AUC',
+    title = 'Post-event change in AUC'
+  )
+```
+
+On the other hand, it should still be okay to center at the baseline <i>mean or median</i> for interpretation purposes. This is because it is assumed that, after centering at baseline, the base line will hover around 0. Waves alternating above or below the 0-point on the y axis will mostly cancel each other out.

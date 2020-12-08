@@ -1,0 +1,63 @@
+--- 
+title: "Analyzing and visualizing fiber photometry data with fluoR"
+author: "Andrew Tamalunas"
+date: "Last updated `r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: references.bib
+citation_package: natbib
+link-citations: yes
+natbiboptions: "numbers,square,comma,sort,compress"
+description: "This is meant to explain the reasoning behind fluoR's functions and how to use them."
+---
+
+# Introduction {#index}
+
+<i>Analyzing and visualizing fiber photometry data with fluoR</i> is a continuously updated book of tutorials and background information for analyzing and visualizing time series data from behavioral experiments.
+
+## Why use fluoR? {#index-whyfluor}
+
+The `fluoR` R package is the successor to the `GCalcium` package, which I initially wrote to help ensure that my fiber photometry data analyses were accurate, consistent, and transparent. Both R packages and this continuously-updated document were publicly released to save other researchers the time and uncertainty in working with their own data, along with helping keep my knowledge fresh. I will mostly avoid discussion on biological topics for now.
+
+Calcium imaging technologies such as GCaMP produce massive datasets. With repeated trials for each subject, researchers can end up with tens of thousands of data points per subject. Complicating matters further, there seems to be no gold standard for working with and analyzing this type of data. 
+
+fluoR...
+
+- is open-source and transparent
+- has its own user manual
+- is free to use
+
+## Who is fluoR for? {#index-whofluorfor}
+
+Some examples of researchers who may find fluoR useful are those who:
+
+- have recorded multiple trials of time series waveform data 
+- want to look at their recorded data with minimal coding while still knowing how their code works
+- want to test GCaMP data before using the hardware (see `GCaMP` sample dataset)
+
+## Background
+
+### pre-recording {#index-prerecording}
+
+I initially wrote the fluoR package (then named GCalcium) for a pilot study by [Dr. Michael Baratta](https://www.colorado.edu/psych-neuro/michael-baratta). After the main investigators set up the GCaMP6m fiber photometry technology, neural activity was continuously recorded in the infralimbic region (IL) of the ventromedial prefrontal cortex (mPFCv) during escapable tail shock - a "controllable" stressor. We wanted to examine if post-trial neural activity in the rat IL changes after repeated exposure to a controllable stressor. 
+
+There were two main issues that resulted in us using GCaMP for measuring neural activity:
+
+1. electrophysiology is difficult to conduct when using tail shock as a stressor 
+2. <i>fos</i> examination is limited temporally
+
+The included `GCaMP` dataset is a sample of 10 random trials from this pilot study.
+
+### recording {#index-recording}
+
+For recording, we used fiber photometry equipment from [Tucker-Davis Technologies](https://www.tdt.com/), which was set up by [Dr. David Root](https://www.colorado.edu/neuroscience/david-root).
+
+### post-recording {#index-postrecording}
+
+Dr. Root also provided us with a modified version of a Matlab script to load and pre-process the data [@root_fiber_2018]. Ultimately, I decided to export the data for use in another program after the signal averaging step. 
+
+There were a couple of Python add-ons that looked promising. Unfortunately, none of them seemed to discuss how they worked or why the authors took the steps that they did. Using these would make me at odds with my philosophy of "don't run analyses if you don't know how they work". I decided that R, which I had a much more solid background in, was the answer.
+
+While R is generally slower than Matlab, the syntax is much simpler and it is easier to keep track of the steps you took along the way. Additionally, there are a handful of R packages (e.g. ggplot2, plotly) that allow for publication-ready graphs. 
+
+Did I mention R is free?

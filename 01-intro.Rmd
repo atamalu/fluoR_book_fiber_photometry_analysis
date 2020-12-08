@@ -1,0 +1,53 @@
+# Setting up fluoR {#intro}
+
+## Installation {#intro-install}
+
+Currently, fluoR can only be installed from Github.
+
+```{r, eval=FALSE}
+### Install from Github
+devtools::install_github('atamalu/fluoR', build_vignettes = TRUE)
+```
+
+## Convert to fluoR format {#intro-convert}
+
+After exporting your recorded data from your preferred software (e.g. MATLAB, Doric software), the first step is to convert your data for quick use with the fluoR package. The `format_data` function is used for this. 
+
+There are two formats of data supported as input:
+
+<u><b> 1. Vertical format </u></b>
+
+* timestamps in the first column
+* one column for each trial's recorded values
+
+<u><b> 2. Horizontal format </u></b>
+
+- timestamps in the first row
+- one row for each trial's recorded values
+
+## Input/Output {#intro-inout}
+
+<u><b> Input </u></b>
+
+The input for `format_data` can be a matrix or data frame - labeled or unlabeled. The function detects whether the number of rows are greater than the number of columns (vertical) and vice versa (horizontal). 
+
+<u><b> Output </u></b>
+
+If the input is horizontal, then the object is transposed to vertical format. The table is then converted to a data frame, with each column being labeled. This makes manually working with the data more convenient and R-friendly.
+
+The below table is an informal matrix representation of what the returned data frame will look like.
+
+![](./external_figures/fluoR_format_table_example.png)
+
+## Examples {#intro-examples}
+
+### Format data {#intro-formatdata}
+
+Format the `GCaMP` dataset included with the fluoR package so the data is easier to work with.
+
+```{r}
+library(fluoR)
+
+df <- format_data(GCaMP)
+head(df)
+```

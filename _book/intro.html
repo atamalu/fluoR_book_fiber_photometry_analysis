@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 2 Setting up fluoR | Analyzing and visualizing fiber photometry data with fluoR</title>
+  <meta name="description" content="This is meant to explain the reasoning behind fluoR’s functions and how to use them." />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 2 Setting up fluoR | Analyzing and visualizing fiber photometry data with fluoR" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is meant to explain the reasoning behind fluoR’s functions and how to use them." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 2 Setting up fluoR | Analyzing and visualizing fiber photometry data with fluoR" />
+  
+  <meta name="twitter:description" content="This is meant to explain the reasoning behind fluoR’s functions and how to use them." />
+  
+
+<meta name="author" content="Andrew Tamalunas" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="index.html"/>
+<link rel="next" href="stand.html"/>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
+<link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Analyzing and visualizing fiber photometry data with fluoR</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#index-whyfluor"><i class="fa fa-check"></i><b>1.1</b> Why use fluoR?</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#index-whofluorfor"><i class="fa fa-check"></i><b>1.2</b> Who is fluoR for?</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#background"><i class="fa fa-check"></i><b>1.3</b> Background</a><ul>
+<li class="chapter" data-level="1.3.1" data-path="index.html"><a href="index.html#index-prerecording"><i class="fa fa-check"></i><b>1.3.1</b> pre-recording</a></li>
+<li class="chapter" data-level="1.3.2" data-path="index.html"><a href="index.html#index-recording"><i class="fa fa-check"></i><b>1.3.2</b> recording</a></li>
+<li class="chapter" data-level="1.3.3" data-path="index.html"><a href="index.html#index-postrecording"><i class="fa fa-check"></i><b>1.3.3</b> post-recording</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>2</b> Setting up fluoR</a><ul>
+<li class="chapter" data-level="2.1" data-path="intro.html"><a href="intro.html#intro-install"><i class="fa fa-check"></i><b>2.1</b> Installation</a></li>
+<li class="chapter" data-level="2.2" data-path="intro.html"><a href="intro.html#intro-convert"><i class="fa fa-check"></i><b>2.2</b> Convert to fluoR format</a></li>
+<li class="chapter" data-level="2.3" data-path="intro.html"><a href="intro.html#intro-inout"><i class="fa fa-check"></i><b>2.3</b> Input/Output</a></li>
+<li class="chapter" data-level="2.4" data-path="intro.html"><a href="intro.html#intro-examples"><i class="fa fa-check"></i><b>2.4</b> Examples</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="intro.html"><a href="intro.html#intro-formatdata"><i class="fa fa-check"></i><b>2.4.1</b> Format data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="stand.html"><a href="stand.html"><i class="fa fa-check"></i><b>3</b> Standardizing Data</a><ul>
+<li class="chapter" data-level="3.1" data-path="stand.html"><a href="stand.html#stand-reasons"><i class="fa fa-check"></i><b>3.1</b> Reasons to standardize data</a></li>
+<li class="chapter" data-level="3.2" data-path="stand.html"><a href="stand.html#stand-methods"><i class="fa fa-check"></i><b>3.2</b> Methods of standardization</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="stand.html"><a href="stand.html#stand-methods-zscore"><i class="fa fa-check"></i><b>3.2.1</b> z-scores</a></li>
+<li class="chapter" data-level="3.2.2" data-path="stand.html"><a href="stand.html#stand-methods-bzscore"><i class="fa fa-check"></i><b>3.2.2</b> baseline z-scores</a></li>
+<li class="chapter" data-level="3.2.3" data-path="stand.html"><a href="stand.html#stand-methods-mzscore"><i class="fa fa-check"></i><b>3.2.3</b> modified z scores</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="stand.html"><a href="stand.html#stand-comparison"><i class="fa fa-check"></i><b>3.3</b> z-score comparison</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="stand.html"><a href="stand.html#stand-comparison-vis"><i class="fa fa-check"></i><b>3.3.1</b> Visualization</a></li>
+<li class="chapter" data-level="3.3.2" data-path="stand.html"><a href="stand.html#stand-comparison-table"><i class="fa fa-check"></i><b>3.3.2</b> Summary table</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="stand.html"><a href="stand.html#stand-examples"><i class="fa fa-check"></i><b>3.4</b> Examples</a><ul>
+<li class="chapter" data-level="3.4.1" data-path="stand.html"><a href="stand.html#stand-examples-ex1"><i class="fa fa-check"></i><b>3.4.1</b> Example 1</a></li>
+<li class="chapter" data-level="3.4.2" data-path="stand.html"><a href="stand.html#stand-examples-ex2"><i class="fa fa-check"></i><b>3.4.2</b> Example 2</a></li>
+<li class="chapter" data-level="3.4.3" data-path="stand.html"><a href="stand.html#stand-examples-ex3"><i class="fa fa-check"></i><b>3.4.3</b> Example 3</a></li>
+<li class="chapter" data-level="3.4.4" data-path="stand.html"><a href="stand.html#stand-examples-ex4"><i class="fa fa-check"></i><b>3.4.4</b> Example 4</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="vis.html"><a href="vis.html"><i class="fa fa-check"></i><b>4</b> Visualization</a><ul>
+<li class="chapter" data-level="4.1" data-path="vis.html"><a href="vis.html#vis-multiple"><i class="fa fa-check"></i><b>4.1</b> Multiple trials</a><ul>
+<li class="chapter" data-level="4.1.1" data-path="vis.html"><a href="vis.html#vis-multiple-plotfluor"><i class="fa fa-check"></i><b>4.1.1</b> plot_trials</a></li>
+<li class="chapter" data-level="4.1.2" data-path="vis.html"><a href="vis.html#vis-multiple-plotgg"><i class="fa fa-check"></i><b>4.1.2</b> ggplot2</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="vis.html"><a href="vis.html#vis-ranges"><i class="fa fa-check"></i><b>4.2</b> Trial ranges</a></li>
+<li class="chapter" data-level="4.3" data-path="vis.html"><a href="vis.html#vis-smoothing"><i class="fa fa-check"></i><b>4.3</b> Smoothing</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="vis.html"><a href="vis.html#vis-smoothing-whittaker"><i class="fa fa-check"></i><b>4.3.1</b> Whittaker filter</a></li>
+<li class="chapter" data-level="4.3.2" data-path="vis.html"><a href="vis.html#vis-smoothing-gam"><i class="fa fa-check"></i><b>4.3.2</b> Generalized additive modeling</a></li>
+<li class="chapter" data-level="4.3.3" data-path="vis.html"><a href="vis.html#vis-smoothing-loess"><i class="fa fa-check"></i><b>4.3.3</b> Loess</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="vis.html"><a href="vis.html#vis-furtherreading"><i class="fa fa-check"></i><b>4.4</b> Further reading</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="analysis.html"><a href="analysis.html"><i class="fa fa-check"></i><b>5</b> Analysis</a><ul>
+<li class="chapter" data-level="5.1" data-path="analysis.html"><a href="analysis.html#analysis-metrics"><i class="fa fa-check"></i><b>5.1</b> Metrics</a><ul>
+<li class="chapter" data-level="5.1.1" data-path="analysis.html"><a href="analysis.html#analysis-metrics-peaks"><i class="fa fa-check"></i><b>5.1.1</b> Peaks</a></li>
+<li class="chapter" data-level="5.1.2" data-path="analysis.html"><a href="analysis.html#analysis-metrics-auc"><i class="fa fa-check"></i><b>5.1.2</b> Area under curve</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="analysis.html"><a href="analysis.html#analysis-app"><i class="fa fa-check"></i><b>5.2</b> Applications</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="analysis.html"><a href="analysis.html#analysis-app-numpeaks"><i class="fa fa-check"></i><b>5.2.1</b> Number of peaks above z score</a></li>
+<li class="chapter" data-level="5.2.2" data-path="analysis.html"><a href="analysis.html#analysis-app-peakdist"><i class="fa fa-check"></i><b>5.2.2</b> Distance between peaks</a></li>
+<li class="chapter" data-level="5.2.3" data-path="analysis.html"><a href="analysis.html#analysis-app-auc"><i class="fa fa-check"></i><b>5.2.3</b> Area under curve</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Analyzing and visualizing fiber photometry data with fluoR</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="intro" class="section level1">
+<h1><span class="header-section-number">Chapter 2</span> Setting up fluoR</h1>
+<div id="intro-install" class="section level2">
+<h2><span class="header-section-number">2.1</span> Installation</h2>
+<p>Currently, fluoR can only be installed from Github.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="intro.html#cb1-1"></a><span class="co">### Install from Github</span></span>
+<span id="cb1-2"><a href="intro.html#cb1-2"></a>devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&#39;atamalu/fluoR&#39;</span>, <span class="dt">build_vignettes =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="intro-convert" class="section level2">
+<h2><span class="header-section-number">2.2</span> Convert to fluoR format</h2>
+<p>After exporting your recorded data from your preferred software (e.g. MATLAB, Doric software), the first step is to convert your data for quick use with the fluoR package. The <code>format_data</code> function is used for this.</p>
+<p>There are two formats of data supported as input:</p>
+<p><u><b> 1. Vertical format </u></b></p>
+<ul>
+<li>timestamps in the first column</li>
+<li>one column for each trial’s recorded values</li>
+</ul>
+<p><u><b> 2. Horizontal format </u></b></p>
+<ul>
+<li>timestamps in the first row</li>
+<li>one row for each trial’s recorded values</li>
+</ul>
+</div>
+<div id="intro-inout" class="section level2">
+<h2><span class="header-section-number">2.3</span> Input/Output</h2>
+<p><u><b> Input </u></b></p>
+<p>The input for <code>format_data</code> can be a matrix or data frame - labeled or unlabeled. The function detects whether the number of rows are greater than the number of columns (vertical) and vice versa (horizontal).</p>
+<p><u><b> Output </u></b></p>
+<p>If the input is horizontal, then the object is transposed to vertical format. The table is then converted to a data frame, with each column being labeled. This makes manually working with the data more convenient and R-friendly.</p>
+<p>The below table is an informal matrix representation of what the returned data frame will look like.</p>
+<p><img src="external_figures/fluoR_format_table_example.png" /></p>
+</div>
+<div id="intro-examples" class="section level2">
+<h2><span class="header-section-number">2.4</span> Examples</h2>
+<div id="intro-formatdata" class="section level3">
+<h3><span class="header-section-number">2.4.1</span> Format data</h3>
+<p>Format the <code>GCaMP</code> dataset included with the fluoR package so the data is easier to work with.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="intro.html#cb2-1"></a><span class="kw">library</span>(fluoR)</span>
+<span id="cb2-2"><a href="intro.html#cb2-2"></a></span>
+<span id="cb2-3"><a href="intro.html#cb2-3"></a>df &lt;-<span class="st"> </span><span class="kw">format_data</span>(GCaMP)</span>
+<span id="cb2-4"><a href="intro.html#cb2-4"></a><span class="kw">head</span>(df)</span></code></pre></div>
+<pre><code>##      Time Trial1 Trial2 Trial3 Trial4 Trial5 Trial6 Trial7 Trial8 Trial9
+## 1 -3.9902 82.689 82.858 81.709 89.747 90.788 90.365 123.53 120.39 119.95
+## 2 -3.9803 82.656 82.922 81.702 89.637 90.847 90.418 123.30 120.41 119.82
+## 3 -3.9705 82.650 82.984 81.713 89.545 90.927 90.485 123.13 120.45 119.73
+## 4 -3.9607 82.671 83.042 81.726 89.476 91.003 90.578 123.02 120.52 119.66
+## 5 -3.9508 82.712 83.085 81.732 89.428 91.056 90.696 122.96 120.59 119.62
+## 6 -3.9410 82.757 83.116 81.714 89.397 91.080 90.833 122.95 120.66 119.60
+##   Trial10
+## 1  116.94
+## 2  116.97
+## 3  117.00
+## 4  117.01
+## 5  117.00
+## 6  116.97</code></pre>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="stand.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["fluoR_bookdown.pdf", "fluoR_bookdown.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

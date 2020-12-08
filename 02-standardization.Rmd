@@ -1,0 +1,373 @@
+# Standardizing Data {#stand}
+
+```{r}
+library(fluoR)
+df <- format_data(GCaMP)
+```
+
+```{r, include=FALSE}
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+theme_set(theme_pubclean())
+```
+
+## Reasons to standardize data {#stand-reasons}
+
+There are a few reasons to standardize your data before exploring your data. 
+
+<b><u> 1. Signal differs between subjects </b></u>
+
+- Regardless of the specific technologies used, there is almost always differences in signal strength for each subject
+
+<b><u> 2. Signal differs between trials </b></u>
+
+- The strength of recording signal tends to decay over time
+
+<b><u> 3. Utilizing baseline values </b></u>
+
+- Using transformations such as percent change allows you to center the data at an objective value
+- After centering your trial and post-trial data, the data is interpreted as relative to baseline values
+- The baseline period is typically assumed to be a "resting" period prior to exposure to the experimental manipulation. This means that using standardization methods (particularly z-scores) also takes baseline <i>deviations</i> into consideration.
+
+## Methods of standardization {#stand-methods}
+
+A little alteration in how we compute z-scores can make a significant difference.
+
+### z-scores {#stand-methods-zscore}
+
+Standard z-score transformations work the same way with time series data as with any other. The formula:
+
+1. centers every value (x) at the mean of the full time series (mu) 
+2. divides it by the standard deviation of the full time series (sigma).
+
+<BR>
+
+\begin{gather*}
+  z_{i} = \frac{x_{i}-\mu}{\sigma}
+\end{gather*}
+\begin{align*}
+  \text{where...} \\
+  \mu &= \text{mean of full trial period,} \\
+  \sigma &= \text{standard deviation of full trial period} \\
+\end{align*}
+
+<BR>
+
+This results in the same time series in terms of standard deviations from the mean, all in the context of the full time series.
+
+#### R Code {#stand-methods-zscore-code}
+
+```{r}
+z.scores <- z_score(xvals = df$Trial8,
+                    mu = mean(df$Trial8), # manual input of mu/sigma optional;
+                    sigma = sd(df$Trial8)) # used for example purposes
+```
+
+#### Visualization {#stand-methods-zscore-vis}
+
+```{r, include=FALSE}
+df.zscores <- data.frame(
+  Time = df$Time,
+  Values = df$Trial8,
+  Zscores = z.scores
+)
+```
+
+```{r, echo=FALSE}
+### Graph 1
+z.graph1 <- ggplot(df.zscores) + 
+  geom_vline(xintercept = 0,
+             color = 'red', alpha = 0.075) +
+  geom_line(aes(x = Time, y = Values)) +
+  labs(
+    x = 'Time Post-Onset',
+    title = 'raw values'
+  ) +
+  theme(
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank()
+  )
+
+### Graph 2
+z.graph2 <- ggplot(df.zscores) + 
+  geom_vline(xintercept = 0,
+             color = 'red', alpha = 0.075) +
+  geom_line(aes(x = Time, y = Zscores)) +
+  labs(
+    x = 'Time Post-Onset',
+    title = 'z scores'
+  ) +
+  theme(
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank()
+  )
+
+### Finishing touches for 2x graph
+plot_grid(z.graph1, z.graph2, ncol = 1, 
+          nrow = 2, align = 'v')
+```
+
+### baseline z-scores {#stand-methods-bzscore}
+
+Using the pre-event baseline period as the input values for computing z-scores can be useful in revealing changes in neural activity that you may not find by just comparing pre-trial and trial periods. This is in part because baseline periods tend to have relatively low variability.
+
+As you can see from the formula, a lower standard deviation will increase positive values and decrease negative values - thus making changes in neural activity more apparent.
+
+<BR>
+
+\begin{gather*}
+  baseline \ z_{i} = \frac{x_{i}-\bar{x}_{baseline}}{s_{baseline}}
+\end{gather*}
+\begin{align*}
+  \text{where...} \\
+  \bar{x}_{baseline} &= \text{mean of values from baseline period,} \\
+  {s}_{baseline} &= \text{standard deviation of values from baseline period} \\
+\end{align*}
+
+<BR>
+
+This results in a time series interpreted in terms of standard deviations and mean during the baseline period. Baseline z-scores are conceptually justifiable because the standard deviation is then the number of deviations from the mean when a subject is at rest. The values outside of the baseline period will be different using this version, but not within the baseline period.
+
+#### R Code {#stand-methods-bzscore-code}
+
+```{r}
+### Extract baseline values
+baseline.vals <- df$Trial8[df$Time >= -4 & df$Time <= 0]
+
+### Compute z-scores
+z.scores.baseline <- z_score(xvals = df$Trial8,
+                             mu = mean(baseline.vals),
+                             sigma = sd(baseline.vals))
+```
+
+#### Visualization {#stand-methods-bzscore-vis}
+
+```{r, include=FALSE}
+df.base.zscores <- data.frame(
+  Time = df$Time,
+  Values = df$Trial8,
+  Zscores = z.scores.baseline
+)
+```
+
+```{r, echo=FALSE}
+### Graph 1
+zbase.graph1 <- ggplot(df.base.zscores) + 
+  geom_vline(xintercept = 0,
+             color = 'red', alpha = 0.075) +
+  geom_line(aes(x = Time, y = Values)) +
+  labs(
+    x = 'Time Post-Onset',
+    title = 'raw values'
+  ) +
+  theme(
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank()
+  )
+
+### Graph 2
+zbase.graph2 <- ggplot(df.base.zscores) + 
+  geom_vline(xintercept = 0,
+             color = 'red', alpha = 0.075) +
+  geom_line(aes(x = Time, y = Zscores)) +
+  labs(
+    x = 'Time Post-Onset',
+    title = 'z-scores from baseline'
+  ) +
+  theme(
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank()
+  )
+
+### Finishing touches for 2x graph
+plot_grid(zbase.graph1, zbase.graph2, ncol = 1, 
+          nrow = 2, align = 'v')
+```
+
+### modified z scores {#stand-methods-mzscore}
+
+Waveform data fluctuates naturally. But in the event of a change in activity due to external stimuli, signal variation tends to rapidly increase and/or decrease and becomes unruly. 
+
+<BR>
+
+\begin{gather*}
+  modified \ z_{i} = \frac{0.6745(x_{i}-\widetilde{x})}{MAD}
+\end{gather*}
+\begin{align*}
+  \text{where...} \\
+  \widetilde{x} &= \text{sample median,} \\
+  {MAD} &= \text{median absolute deviation}
+\end{align*}
+
+<BR>
+
+#### R Code {#stand-methods-mzscore-code}
+
+```{r}
+z.scores.modified <- z_score(xvals = df$Trial8, 
+                             z.type = 'modified')
+```
+
+#### Visualization {#stand-methods-mzscore-vis}
+
+```{r, include=FALSE}
+df.mod.zscores <- data.frame(
+  Time = df$Time,
+  Values = df$Trial8,
+  Zscores = z.scores.modified
+)
+```
+
+```{r, echo=FALSE}
+### Graph 1
+zmod.graph1 <- ggplot(df.mod.zscores) + 
+  geom_vline(xintercept = 0,
+             color = 'red', alpha = 0.075) +
+  geom_line(aes(x = Time, y = Values)) +
+  labs(
+    x = 'Time Post-Onset',
+    title = 'raw values'
+  ) +
+  theme(
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank()
+  )
+
+### Graph 2
+zmod.graph2 <- ggplot(df.mod.zscores) + 
+  geom_vline(xintercept = 0,
+             color = 'red', alpha = 0.075) +
+  geom_line(aes(x = Time, y = Zscores)) +
+  labs(
+    x = 'Time Post-Onset',
+    title = 'modified z scores'
+  ) +
+  theme(
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank()
+  )
+
+### Finishing touches for 2x graph
+plot_grid(zmod.graph1, zmod.graph2, ncol = 1, 
+          nrow = 2, align = 'v')
+```
+
+## z-score comparison {#stand-comparison}
+
+### Visualization {#stand-comparison-vis}
+
+```{r, include=FALSE}
+### Construct data frame
+df.graph <- data.frame(
+  Time = c(df$Time, df$Time, df$Time),
+  Values = c(z.scores, z.scores.baseline, z.scores.modified),
+  Type = as.character(c(rep.int("Standard", times = length(z.scores)), 
+                        rep.int("Baseline", times = length(z.scores)),
+                        rep.int("Modified", times = length(z.scores)))),
+  stringsAsFactors = TRUE
+)
+
+df.graph$Type = factor(df.graph$Type, levels = c("Standard", "Baseline", "Modified"))
+```
+
+```{r, echo=FALSE}
+### Graph
+ggplot(df.graph) +
+  geom_vline(xintercept = 0,
+             color = 'red',
+             alpha = 0.075) +
+  geom_line(aes(x = Time, y = Values)) +
+  facet_grid(Type ~ .) +
+  labs(
+    x = 'Time Post-Onset',
+    y = 'z score'
+  ) +
+  theme(
+    axis.ticks = element_blank()
+  )
+```
+
+### Summary table {#stand-comparison-table}
+
+![](./external_figures/tables/standardization_table.png)
+
+## Examples {#stand-examples}
+
+### Example 1 {#stand-examples-ex1}
+
+<b>Standardize trial 8 so that the units are in terms of standard deviations from the mean of the full time series.</b>
+
+```{r, eval=FALSE}
+z_score(xvals = df$Trial8,
+        z.type = 'standard')
+```
+
+### Example 2 {#stand-examples-ex2}
+
+<b>Standardize trial 8 so that the units are in terms of standard deviations from the mean of the pre-event period.</b>
+
+We can do this manually for each trial.
+
+```{r}
+### Manual
+baseline.vals <- df$Trial8[df$Time >= -4 & df$Time <= 0] # extract baseline values
+  
+baseline.z <- z_score(xvals = df$Trial8,
+                      mu = mean(baseline.vals), # mean of baseline
+                      sigma = sd(baseline.vals), # sd of baseline
+                      z.type = 'standard')
+```
+
+Or we can use the `baseline_transform` wrapper.
+
+```{r}
+baseline.zdf <- baseline_transform(dataframe = df,
+                                   trials = 8,
+                                   baseline.times = c(-4, 0),
+                                   type = 'z_standard')
+```
+
+Both methods will result in the same values.
+
+```{r}
+all(baseline.zdf$Trial8 - baseline.z == 0)
+```
+
+### Example 3 {#stand-examples-ex3}
+
+<b>Standardize trial 8 so that the units are in terms of deviations from the median of the full time series.</b>
+
+```{r, eval=FALSE}
+z_score(xvals = df$Trial8,
+        z.type = 'modified')
+```
+
+### Example 4 {#stand-examples-ex4}
+
+<b>Convert trial 8 so that the units are in terms of percent change from the mean of the pre-event period.</b>
+
+We can do this manually for each trial.
+
+```{r}
+### Manual
+baseline.vals <- df$Trial8[df$Time >= -4 & df$Time <= 0] # extract baseline values
+  
+perc.change <- percent_change(xvals = df$Trial8,
+                              base.val = mean(baseline.vals))
+```
+
+Or we can use the `baseline_transform` wrapper.
+
+```{r}
+perc.changedf <- baseline_transform(dataframe = df,
+                                    trials = 8,
+                                    baseline.times = c(-4, 0),
+                                    type = 'percent_change')
+```
+
+Both methods will result in the same values.
+
+```{r}
+all(perc.changedf$Trial8 - perc.change == 0)
+```

@@ -1,0 +1,255 @@
+# Visualization {#vis}
+
+```{r}
+library(fluoR)
+df <- format_data(GCaMP)
+```
+
+## Multiple trials {#vis-multiple}
+
+The `plot_trials` command uses R's base plotting functions for data exploration purposes. Some benefits of using this function are:
+
+1. Much faster graphing than alternatives (e.g. ggplot2, plotly)
+2. Automatic scaling of x- and y- axes for graphing multiple trials so that all data points fit in the plot boundaries
+3. Automatic color coding and trial number labeling
+4. Plotting multiple trials with a single command while using default fluoR data frame format 
+
+The more you need to graph your data in R, the more clear the tradeoff between `plot_trials` and `ggplot` becomes.
+
+- `plot_trials` will save significant time from extra data manipulation when looking through your data, especially when examining a large number of trials 
+- `ggplot` will be much more appropriate for publication and presentation graphing
+
+### plot_trials {#vis-multiple-plotfluor}
+
+```{r}
+base.trials <- plot_trials(dataframe = df,
+                           trials = 8:10)
+```
+
+### ggplot2 {#vis-multiple-plotgg}
+
+For plotting multiple trials using ggplot2, we will need the data frame to be in "long" format. So, we stack the trials we want to plot.
+
+```{r}
+df.long <- data.frame(
+  Time = rep(df$Time, times = 3), # repeat time values by number of trials
+  Values = c(df$Trial8, df$Trial9, df$Trial10), # vector of trial values
+  Trial = c(rep("8", length(df$Trial8)), # label trial numbers
+            rep("9", length(df$Trial9)), 
+            rep("10", length(df$Trial10)))
+)
+```
+
+Now we can make the graph using ggplot2.
+
+```{r}
+library(ggplot2)
+library(ggpubr) # for theme
+
+ggplot(df.long) +
+  geom_line(aes(x = Time, y = Values,
+                color = Trial)) +
+  scale_color_manual(values = c("8" = 'chartreuse3', 
+                                "9" = 'cornflowerblue', 
+                                "10" = 'darkgoldenrod1')) +
+  theme_pubclean()
+```
+
+## Trial ranges {#vis-ranges}
+
+Let's say that you have 30 trials. As part of your hypothesis, you believe that neural activity will change shortly after exposure to a stimulus during trials 1-10, but not subsequent ones. 
+
+One method of examining this could be:
+
+1. Standardize your data so it accounts for within-subject and between-trial differences
+2. Break your data into "blocks" of 10 and collapse the data across trials for each time point using a summary statistic such as the mean or median
+3. Plot the values using 3 groups: trials 1-10, trials 11-20, and trials 21-30
+
+Unfortunately, a 30+ trial dataset would not be ideal to include in the fluoR package. So, we will use trial "blocks" of 3, which results in the groups being trials 1-3, 4-6, and 7-9. 
+
+For the first part, we standardize the data into z-scores from baseline.
+
+```{r}
+### 1. Standardize data
+df.stand <- baseline_transform(dataframe = df, 
+                               trials = 1:10, 
+                               baseline.times = c(-4,0),
+                               type = 'z_standard')
+```
+
+For the second part, we find the median value for each time point from each of the 3 trial blocks.
+
+```{r}
+### 2. Summarize/collapse across blocks of trials
+df.block1 <- summarize_trials(dataframe = df.stand, trials = 1:3,
+                              summary.type = 'median')
+df.block2 <- summarize_trials(dataframe = df.stand, trials = 4:6,
+                              summary.type = 'median')
+df.block3 <- summarize_trials(dataframe = df.stand, trials = 7:9,
+                              summary.type = 'median')
+```
+
+Graphing summarize data tends to be more for publication than exploration purposes, so we want to use ggplot2. Fortunately, creating multiple data frames `summarize_trials` allows us to simply assign a label column to each data frame and combine them before graphing.
+
+```{r}
+df.block1$trial.range <- '1-3'
+df.block2$trial.range <- '4-6'
+df.block3$trial.range <- '7-9'
+
+df.blocked <- rbind(df.block1, df.block2, df.block3)
+```
+
+Last, we plot the summarized values.
+
+```{r}
+ggplot(df.blocked) +
+  geom_vline(xintercept = 0,
+             color = 'red', alpha = 0.075) + # event onset at 0
+  geom_line(aes(x = Time, y = summ.trials,
+                color = trial.range)) + # trial lines
+  labs(
+    x = 'Time Post-Onset',
+    y = 'z score',
+    color = 'Trials'
+  ) +
+  theme_pubclean()
+```
+
+## Smoothing {#vis-smoothing}
+
+As you can see by the previous graphs, the recorded data looks sharp when graphed across time points. While this should be used for the data extraction and analysis phase, we do not have this limitation when graphing. 
+
+The idea is to keep your data as similar as possible to the original time series while making an appealing visualization. Time series filters can help with this.
+
+### Whittaker filter {#vis-smoothing-whittaker}
+    
+The Whittaker filter is a smoother that fits a curve to the data and penalizes highly-deviating points using the penalized least squares (PLS) method. There are two important parameters for this formula:
+
+- <i>lambda</i> - smoothing parameter that controls the amount of curvature allowed for the least-squares fit. A smaller lambda permits more curvature
+- <i>d</i> - order of differences for the least-squares penalty
+
+The `pracma` R package includes an implementation of the Whittaker smoother [@borchers_pracma_2019].
+
+```{r}
+library(pracma)
+
+Trial8.whittaker <- whittaker(y = df$Trial8)
+```
+
+```{r, include=FALSE}
+df.whit <- data.frame(
+  Time = c(df$Time, df$Time),
+  Value = c(df$Trial8, Trial8.whittaker),
+  Type = c(rep('Raw', length(df$Trial8)), 
+           rep('Whittaker', length(Trial8.whittaker)))
+)
+```
+
+```{r echo=FALSE}
+ggplot(df.whit) +
+  geom_line(aes(x = Time, y = Value,
+                color = Type)) +
+  theme_pubclean() +
+  labs(
+    title = 'Demonstrating the Whittaker Filter',
+    x = 'Time Post-Onset'
+  )
+```
+
+As shown by the above figure, the Whittaker filter produces a much more "tame" line. In turn, the line makes extreme values (peaks and valleys) smaller. This filter tends to be useful when trying to smooth data without flattening too many curves.
+
+### Generalized additive modeling {#vis-smoothing-gam}
+
+I have only found generalized additive modeling useful as a smoother or for predictive modeling. This is because GAM's tend to overfit the model to the data, which is a big no-no in hypothesis testing.
+
+The `mgcv` R package includes a popular implementation of GAM's. The formula input for the package's `gam` function is styled like R's base `glm` function. To smooth our time series data, we use Time as the dependent variable and our observation values as the independent variable. 
+
+```{r, message=FALSE, warning=FALSE}
+### Compute gam
+library(mgcv)
+
+### Construct model
+gam1 <- gam(Time ~ s(Trial8, bs = 'cs'), data = df) # construct model
+gamfit <- predict(gam1, data = df) # use model to create fitted line
+```
+
+There are also a handful of other parameters found in [the documentation](https://www.rdocumentation.org/packages/mgcv/versions/1.8-33/topics/gam) that can be changed, but I typically avoid. If you don't need to change the additional parameters, `ggplot2` has a command that smooths the data automatically and scales it to your original data points.
+
+```{r}
+ggplot(df, aes(x = Time, y = Trial8)) +
+  geom_line() +
+  stat_smooth(method = 'gam') +
+  labs(
+    x = 'Time Post-Offset',
+    y = 'Value',
+    title = 'GAM smoothed line over raw values'
+    ) +
+  theme_pubclean()
+```
+
+In this situation, the GAM captures the general direction of the data points but almost completely removes smaller peaks/valleys and flattens extreme values.
+
+### Loess {#vis-smoothing-loess}
+
+#### model {#vis-smoothing-loess-model}
+
+Locally estimated scatterplot smoothing (loess) is a non-parametric regression that uses multiple regression in k-nearest-neighbor meta-models.
+
+Loess models require much more data than standard regression. Luckily, this makes loess a solid choice for smoothing fiber photometry data. Much less so for testing hypotheses.
+
+The `stats` package includes the `loess` function that allows us to implement it in typical R regression form. However, researchers will seldom find use for loess as a model itself. 
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(df, aes(x = Time, y = Trial8)) +
+  geom_line() +
+  stat_smooth(method = 'loess') +
+  labs(
+    x = 'Time Post-Offset',
+    y = 'Value',
+    title = 'Loess smoothed line over raw values'
+    ) +
+  theme_pubclean()
+```
+
+Additionally, you can change the `span` parameter to control the degree of smoothing.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, class.source = 'fold-hide'}
+library(cowplot) # for plot_grid
+
+##### Make base plot ---------------
+base.gg <- ggplot(df, aes(x = Time, y = Trial8)) +
+  geom_line() +
+  labs(x = 'Time Post-Offset',
+       y = 'Value') +
+  theme_pubclean()
+
+##### Make each span plot ---------------
+span.10 <- base.gg + 
+  stat_smooth(method = 'loess', span = .10, se = FALSE) +
+  ggtitle('span = .10')
+span.50 <- base.gg + 
+  stat_smooth(method = 'loess', span = .50, se = FALSE) +
+  ggtitle('span = .50')
+span.90 <- base.gg + 
+  stat_smooth(method = 'loess', span = .90, se = FALSE) +
+  ggtitle('span = .90')
+
+### make title object
+p.title <- ggdraw() +
+  draw_label("Testing loess spans in ggplot2", fontface = 'bold')
+
+##### Throw into cowplot grid object ---------------
+plot_grid(p.title, span.10, span.50, span.90, 
+          ncol = 1, nrow = 4, align = 'v',
+          rel_heights = c(.1, .3, .3, .3))
+```
+
+## Further reading {#vis-furtherreading}
+
+<B><I>Programming</I></B>
+
+- UCLA's statistics consulting released a guide to working with time series smoothing using the `ggplot2` package [@ucla_smoothing]
+
+<B><I>Math</I></B>
+
+- [@wood_smoothing_2016] offer examples of time series smoothing using the `mgcv` package. The authors also go <i>very</i> in-depth with the math behind the methods.
